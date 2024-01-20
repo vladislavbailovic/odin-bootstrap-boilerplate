@@ -11,7 +11,9 @@ version: odin
 	$(ODIN) version
 
 run: odin src/*
-	$(ODIN) run main.odin -file -out:/app/build/main
+	$(ODIN) run main.odin -file \
+		-out:/app/build/main \
+		-extra-linker-flags:-static
 
 odin: Dockerfile build/.built-odin
 	# Maybe building odin docker image

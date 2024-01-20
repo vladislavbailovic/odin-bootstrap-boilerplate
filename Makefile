@@ -7,18 +7,15 @@ ODIN=docker run --rm --name odin \
 help: odin
 	$(ODIN) help run
 
-version: odin
-	$(ODIN) version
-
 run: odin src/*
 	$(ODIN) run main.odin -file \
 		-out:/app/build/main \
 		-extra-linker-flags:-static
 
-odin: Dockerfile build/.built-odin
+odin: Dockerfile build/.built-odin-version
 	# Maybe building odin docker image
 
-build/.built-odin:
+build/.built-odin-version:
 	-mkdir build
 	docker build --tag odin .
-	touch $@
+	$(ODIN) version > $@

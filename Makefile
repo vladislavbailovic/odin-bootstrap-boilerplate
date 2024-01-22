@@ -1,6 +1,9 @@
 ifndef FORCE_PULL
 	ODIN_BUILTIN := $(shell command -v odin 2> /dev/null)
 endif
+ifdef NO_CACHE
+	DOCKER_FLAGS := --no-cache
+endif
 
 ifndef ODIN_BUILTIN
 	ODIN = docker run --rm --name odin \
@@ -33,6 +36,6 @@ endif
 build/.built-odin-version:
 ifndef ODIN_BUILTIN
 	-mkdir build
-	docker build --tag odin .
+	docker build $(DOCKER_FLAGS) --tag odin .
 endif
 	$(ODIN) version > $@

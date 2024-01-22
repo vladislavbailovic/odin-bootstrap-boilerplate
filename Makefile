@@ -1,21 +1,38 @@
-ODIN=docker run --rm --name odin \
-	--volume $(shell readlink -f ./src):/app/src \
-	--volume $(shell readlink -f ./build):/app/build \
-	--workdir /app/src \
-	odin
+ifndef FORCE_PULL
+	ODIN_BUILTIN := $(shell command -v odin 2> /dev/null)
+endif
+
+ifndef ODIN_BUILTIN
+	ODIN = docker run --rm --name odin \
+		--volume $(shell readlink -f ./src):/app/src \
+		--volume $(shell readlink -f ./build):/app/build \
+		--workdir /app \
+		odin
+else
+	ODIN = odin
+endif
 
 help: odin
 	$(ODIN) help run
 
 run: odin src/*
-	$(ODIN) run main.odin -file \
-		-out:/app/build/main \
+	$(ODIN) run src/main.odin -file \
+		-out:./build/main \
 		-extra-linker-flags:-static
 
+clean:
+	-rm build/*
+	-rm build/.built-odin-version
+
 odin: Dockerfile build/.built-odin-version
-	# Maybe building odin docker image
+ifdef FORCE_PULL
+	-rm build/.built-odin-version
+	make build/.built-odin-version
+endif
 
 build/.built-odin-version:
+ifndef ODIN_BUILTIN
 	-mkdir build
 	docker build --tag odin .
+endif
 	$(ODIN) version > $@
